@@ -1,4 +1,4 @@
-import { empresas, idEmpresaCtr } from '../service/db';
+import { empresas, idEmpresaCtr } from '../data/db';
 import { EmpresaAliada } from '../models/EmpresaAliada';
 import { TipoRelacionEmpresa } from '../models/TipoRelacionEmpresa';
 

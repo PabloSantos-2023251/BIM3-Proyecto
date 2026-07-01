@@ -1,4 +1,4 @@
-import { usuarios, idUsuarioCtr } from '../service/db';
+import { usuarios, idUsuarioCtr } from '../data/db';
 import { Usuario } from '../models/Usuario';
 import { UsuarioRol } from '../models/UsuarioRol';
 
