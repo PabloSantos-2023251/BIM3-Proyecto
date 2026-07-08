@@ -1,6 +1,6 @@
 export enum UsuarioRol {
-    ADMINISTRADOR = 'Administrador',
-    TRABAJADOR_SOCIAL = 'Trabajador Social',
-    VOLUNTARIO = 'Voluntario',
-    DONANTE = 'Donante'
+    ADMINISTRADOR = "ADMINISTRADOR",
+    TRABAJADOR_SOCIAL = "TRABAJADOR SOCIAL",
+    VOLUNTARIO = "VOLUNTARIO",
+    DONANTE = "DONANTE"
 }
