@@ -1,29 +1,16 @@
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import { dirname } from 'path';
-import { Usuario } from '../models/Usuario';
+import { readFile, writeFile } from 'fs/promises';
+import { Usuario } from '../models/Usuario.js';
 
-const PATH = './data_json/usuarios.json';
-
-async function asegurarCarpeta(): Promise<void> {
-    try { await mkdir(dirname(PATH), { recursive: true }); } catch {}
-}
+const FILE_PATH = './src/data/usuarios.json';
 
 export async function leerUsuarios(): Promise<Usuario[]> {
-    await asegurarCarpeta();
     try {
-        const data = await readFile(PATH, 'utf-8');
-        return JSON.parse(data);
-    } catch (error: any) {
-        if (error.code === 'ENOENT') return [];
-        throw new Error(`Error al leer usuarios: ${error.message}`);
+        return JSON.parse(await readFile(FILE_PATH, 'utf-8'));
+    } catch {
+        return [];
     }
 }
 
-export async function guardarUsuarios(lista: Usuario[]): Promise<void> {
-    await asegurarCarpeta();
-    try {
-        await writeFile(PATH, JSON.stringify(lista, null, 2));
-    } catch (error: any) {
-        throw new Error(`Error al escribir usuarios: ${error.message}`);
-    }
+export async function guardarUsuarios(usuarios: Usuario[]): Promise<void> {
+    await writeFile(FILE_PATH, JSON.stringify(usuarios, null, 2.00));
 }
