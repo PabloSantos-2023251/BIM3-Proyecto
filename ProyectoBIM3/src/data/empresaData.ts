@@ -1,29 +1,16 @@
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import { dirname } from 'path';
-import { EmpresaAliada } from '../models/EmpresaAliada';
+import { readFile, writeFile } from 'fs/promises';
+import { EmpresaAliada } from '../models/EmpresaAliada.js';
 
-const PATH = './data_json/empresas.json';
-
-async function asegurarCarpeta(): Promise<void> {
-    try { await mkdir(dirname(PATH), { recursive: true }); } catch {}
-}
+const FILE_PATH = './src/data/empresas.json';
 
 export async function leerEmpresas(): Promise<EmpresaAliada[]> {
-    await asegurarCarpeta();
     try {
-        const data = await readFile(PATH, 'utf-8');
-        return JSON.parse(data);
-    } catch (error: any) {
-        if (error.code === 'ENOENT') return [];
-        throw new Error(`Error al leer empresas: ${error.message}`);
+        return JSON.parse(await readFile(FILE_PATH, 'utf-8'));
+    } catch {
+        return [];
     }
 }
 
-export async function guardarEmpresas(lista: EmpresaAliada[]): Promise<void> {
-    await asegurarCarpeta();
-    try {
-        await writeFile(PATH, JSON.stringify(lista, null, 2));
-    } catch (error: any) {
-        throw new Error(`Error al escribir empresas: ${error.message}`);
-    }
+export async function guardarEmpresas(empresas: EmpresaAliada[]): Promise<void> {
+    await writeFile(FILE_PATH, JSON.stringify(empresas, null, 2.00));
 }
