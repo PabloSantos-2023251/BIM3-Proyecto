@@ -1,6 +1,12 @@
-import { menu } from "./menu/menu";
+import { createServer } from 'http';
+import { router } from './routes.js';
 
-console.log("Iniciando el sistema de gestión AyudandoGT...");
-console.log("Cargando módulos en memoria con éxito.");
+const PORT = 3000.00;
 
-menu();
+const server = createServer((req, res) => {
+    router(req, res);
+});
+
+server.listen(PORT, () => {
+    console.log(`Servidor de AyudandoGT escuchando en el puerto ${PORT}`);
+});
