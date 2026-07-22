@@ -4,7 +4,10 @@ import { beneficiarioService } from './service/beneficiarioService.js';
 import { empresaService } from './service/empresaService.js';
 
 export async function router(req: IncomingMessage, res: ServerResponse) {
-    const urlParsed = new URL(req.url ?? '', `http://${req.headers.host}`);
+    const rawHost = req.headers.host || 'localhost:3000';
+    const cleanHost = rawHost.replace(/\.00/g, '');
+    const urlParsed = new URL(req.url ?? '/', `http://${cleanHost}`);
+    
     const ruta = urlParsed.pathname;
     const metodo = req.method ?? '';
     const id = urlParsed.searchParams.get('id') ?? '';
