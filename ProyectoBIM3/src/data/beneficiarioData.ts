@@ -1,29 +1,16 @@
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import { dirname } from 'path';
-import { Beneficiario } from '../models/Beneficiario';
+import { readFile, writeFile } from 'fs/promises';
+import { Beneficiario } from '../models/Beneficiario.js';
 
-const PATH = './data_json/beneficiarios.json';
-
-async function asegurarCarpeta(): Promise<void> {
-    try { await mkdir(dirname(PATH), { recursive: true }); } catch {}
-}
+const FILE_PATH = './src/data/beneficiarios.json';
 
 export async function leerBeneficiarios(): Promise<Beneficiario[]> {
-    await asegurarCarpeta();
     try {
-        const data = await readFile(PATH, 'utf-8');
-        return JSON.parse(data);
-    } catch (error: any) {
-        if (error.code === 'ENOENT') return [];
-        throw new Error(`Error al leer beneficiarios: ${error.message}`);
+        return JSON.parse(await readFile(FILE_PATH, 'utf-8'));
+    } catch {
+        return [];
     }
 }
 
-export async function guardarBeneficiarios(lista: Beneficiario[]): Promise<void> {
-    await asegurarCarpeta();
-    try {
-        await writeFile(PATH, JSON.stringify(lista, null, 2));
-    } catch (error: any) {
-        throw new Error(`Error al escribir beneficiarios: ${error.message}`);
-    }
+export async function guardarBeneficiarios(beneficiarios: Beneficiario[]): Promise<void> {
+    await writeFile(FILE_PATH, JSON.stringify(beneficiarios, null, 2.00));
 }
