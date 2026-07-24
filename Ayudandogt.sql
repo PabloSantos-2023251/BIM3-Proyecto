@@ -106,3 +106,54 @@ create table detalle_asignacion_inventario (
     constraint fk_detalle_asignaciones foreign key (id_asignacion) references asignaciones_ayuda(id_asignacion),
     constraint fk_detalle_inventario foreign key (id_articulo) references inventario_especie(id_articulo)
 );
+
+INSERT INTO usuarios (nombre_completo, correo_electronico, contrasena, telefono, rol) VALUES 
+('Carlos Gómez', 'carlos.gomez@gmail.com', 'pass123', '55112233', 'Donante'), 
+('Ana Torres', 'ana.torres@gmail.com', 'pass456', '44223344', 'Donante'), 
+('Luis Ruiz', 'l.ruiz@fundacion.org', 'admin2026', '50001122', 'Administrador'), 
+('María Morales', 'maria.m@gmail.com', 'pass789', '33445566', 'Trabajador Social'), 
+('Empresa Walmart GT', 'contacto@walmart.gt', 'corp123', '22001100', 'Empresa');
+
+INSERT INTO empresas_aliadas (id_usuario, razon_social, tipo_relacion, contacto_corporativo) VALUES 
+(5, 'Operadora de Tiendas S.A.', 'Patrocinador', 'Juan Perez - Gerente RSE'), 
+(1, 'Gómez Consultores S.A.', 'Donante Recurrente', 'Carlos Gómez');
+
+INSERT INTO beneficiarios (cui_dpi, nombre_completo, direccion_comunidad, departamento, cantidad_dependientes) VALUES 
+('2530123450101', 'Juan Jose Lopez', 'Aldea El Carmen, Sector 3', 'Guatemala', 4), 
+('1820987650301', 'Marta Alicia Chajón', 'Caserío Las Flores', 'Sacatepéquez', 2), 
+('3010555550201', 'Pedro Pablo Ramírez', 'Barrio El Centro', 'El Progreso', 5);
+
+INSERT INTO estudios_socioeconomicos (id_beneficiario, id_trabajador, ingreso_mensual_estimado, nivel_vulnerabilidad, fecha_evaluacion) VALUES 
+(1, 4, 1500.00, 'Alta', '2026-07-10'), 
+(2, 4, 2200.00, 'Media', '2026-07-12'), 
+(3, 4, 800.00, 'Extrema', '2026-07-15');
+
+INSERT INTO centros_acopio (nombre_centro, direccion, departamento) VALUES 
+('Centro Central Zona 1', '9na Avenida 10-20, Zona 1', 'Guatemala'), 
+('Sede Antigua', 'Calle del Arco #15', 'Sacatepéquez'), 
+('Centro Progreseño', 'Km 54 Carretera al Atlántico', 'El Progreso');
+
+INSERT INTO donaciones (id_usuario, id_empresa, id_centro, tipo_donacion, fecha_donacion, monto_monetario) VALUES 
+(1, NULL, 1, 'Monetaria', '2026-07-20', 500.00), 
+(2, NULL, 1, 'Especie', '2026-07-21', NULL), 
+(NULL, 1, 2, 'Especie', '2026-07-22', NULL), 
+(3, NULL, 3, 'Monetaria', '2026-07-23', 1200.00);
+
+INSERT INTO inventario_especie (id_donacion, categoria, descripcion, cantidad_disponible) VALUES 
+(2, 'Alimentos', 'Cajas de Arroz de 1lb', 50), 
+(2, 'Ropa', 'Fardos de Abrigos', 15), 
+(3, 'Medicamentos', 'Botiquines de Primeros Auxilios', 30);
+
+INSERT INTO solicitudes_ayuda (id_beneficiario, id_empresa_receptora, descripcion_necesidad, estado_solicitud, fecha_solicitud) VALUES 
+(1, NULL, 'Solicitud de viveres por perdida de cosecha', 'Aprobada', '2026-07-18'), 
+(2, NULL, 'Ropa y abrigos para epoca de lluvia', 'Pendiente', '2026-07-21'), 
+(NULL, 1, 'Insumos medicos para jornada de salud comunitaria', 'Aprobada', '2026-07-22');
+
+INSERT INTO asignaciones_ayuda (id_solicitud, fecha_asignacion, estado_entrega) VALUES 
+(1, '2026-07-23', 'En Bodega'), 
+(3, '2026-07-24', 'Entregado');
+
+INSERT INTO detalle_asignacion_inventario (id_asignacion, id_articulo, cantidad_entregada) VALUES 
+(1, 1, 10), 
+(1, 2, 2), 
+(2, 3, 5);

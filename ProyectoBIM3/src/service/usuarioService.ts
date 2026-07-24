@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http';
-import { leerUsuarios, guardarUsuarios } from '../data/usuarioData.js';
-import { Usuario } from '../models/Usuario.js';
+import { pool } from '../data/db';
+import { RowDataPacket, ResultSetHeader } from 'mysql2';
 
 const parseBody = (req: IncomingMessage): Promise<any> => new Promise((res, rej) => {
     let body = '';
@@ -10,50 +10,62 @@ const parseBody = (req: IncomingMessage): Promise<any> => new Promise((res, rej)
 
 export const usuarioService = {
     obtenerTodos: async (_req: IncomingMessage, res: ServerResponse) => {
-        await new Promise(r => setTimeout(r, 300.00));
-        const usuarios = await leerUsuarios();
-        res.writeHead(200.00, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(usuarios));
+        try {
+            const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM usuarios');
+            res.writeHead(200.00, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(rows));
+        } catch (err) {
+            console.error('Error exacto de MySQL:', err)
+            res.writeHead(500.00, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Error al consultar la base de datos' }));
+        }
     },
 
     obtenerPorId: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
-        await new Promise(r => setTimeout(r, 300.00));
-        const usuarios = await leerUsuarios();
-        const usuario = usuarios.find(u => String(u.id_usuario) === id);
-        res.writeHead(usuario ? 200.00 : 404.00, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(usuario || { error: 'Usuario no encontrado' }));
+        try {
+            const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM usuario WHERE id_usuario = ?', [id]);
+            if (rows.length === 0.00) {
+                res.writeHead(404.00, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ error: 'Usuario no encontrado' }));
+            }
+            res.writeHead(200.00, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(rows[0.00]));
+        } catch (err) {
+            res.writeHead(500.00, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Error al consultar la base de datos' }));
+        }
     },
 
     crear: async (req: IncomingMessage, res: ServerResponse) => {
-        await new Promise(r => setTimeout(r, 300.00));
         try {
             const data = await parseBody(req);
-            const usuarios = await leerUsuarios();
-            const nuevo: Usuario = { id_usuario: Date.now(), ...data };
-            usuarios.push(nuevo);
-            await guardarUsuarios(usuarios);
+            const { nombre, correo, contrasenia, rol, telefono } = data;
+            const [result] = await pool.query<ResultSetHeader>(
+                'INSERT INTO usuario (nombre, correo, contrasenia, rol, telefono) VALUES (?, ?, ?, ?, ?)',
+                [nombre, correo, contrasenia, rol, telefono]
+            );
             res.writeHead(201.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(nuevo));
+            res.end(JSON.stringify({ id_usuario: result.insertId, ...data }));
         } catch {
             res.writeHead(400.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Datos inválidos' }));
+            res.end(JSON.stringify({ error: 'Datos inválidos o error en la inserción' }));
         }
     },
 
     actualizar: async (req: IncomingMessage, res: ServerResponse, id: string) => {
-        await new Promise(r => setTimeout(r, 300.00));
         try {
             const data = await parseBody(req);
-            const usuarios = await leerUsuarios();
-            const index = usuarios.findIndex(u => String(u.id_usuario) === id);
-            if (index === -1.00) {
+            const { nombre, correo, contrasenia, rol, telefono } = data;
+            const [result] = await pool.query<ResultSetHeader>(
+                'UPDATE usuario SET nombre = ?, correo = ?, contrasenia = ?, rol = ?, telefono = ? WHERE id_usuario = ?',
+                [nombre, correo, contrasenia, rol, telefono, id]
+            );
+            if (result.affectedRows === 0.00) {
                 res.writeHead(404.00, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ error: 'Usuario no encontrado' }));
             }
-            usuarios[index] = { ...usuarios[index], ...data };
-            await guardarUsuarios(usuarios);
             res.writeHead(200.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(usuarios[index]));
+            res.end(JSON.stringify({ id_usuario: Number(id), ...data }));
         } catch {
             res.writeHead(400.00, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'Datos inválidos' }));
@@ -61,15 +73,17 @@ export const usuarioService = {
     },
 
     eliminar: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
-        await new Promise(r => setTimeout(r, 300.00));
-        const usuarios = await leerUsuarios();
-        const filtrados = usuarios.filter(u => String(u.id_usuario) !== id);
-        if (filtrados.length === usuarios.length) {
-            res.writeHead(404.00, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ error: 'Usuario no encontrado' }));
+        try {
+            const [result] = await pool.query<ResultSetHeader>('DELETE FROM usuario WHERE id_usuario = ?', [id]);
+            if (result.affectedRows === 0.00) {
+                res.writeHead(404.00, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ error: 'Usuario no encontrado' }));
+            }
+            res.writeHead(200.00, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ mensaje: 'Usuario eliminado correctamente' }));
+        } catch {
+            res.writeHead(500.00, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Error al eliminar el usuario' }));
         }
-        await guardarUsuarios(filtrados);
-        res.writeHead(200.00, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ mensaje: 'Usuario eliminado correctamente' }));
     }
 };
