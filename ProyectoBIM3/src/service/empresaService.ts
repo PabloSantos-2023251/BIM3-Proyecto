@@ -1,88 +1,79 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { pool } from '../data/db.js';
-import { RowDataPacket, ResultSetHeader } from 'mysql2';
-
-const parseBody = (req: IncomingMessage): Promise<any> => new Promise((res, rej) => {
-    let body = '';
-    req.on('data', chunk => body += chunk);
-    req.on('end', () => { try { res(JSON.parse(body || '{}')); } catch { rej(); } });
-});
 
 export const empresaService = {
     obtenerTodos: async (_req: IncomingMessage, res: ServerResponse) => {
         try {
-            const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM empresa');
-            res.writeHead(200.00, { 'Content-Type': 'application/json' });
+            const [rows] = await pool.query('SELECT * FROM empresas_aliadas');
+            res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(rows));
-        } catch {
-            res.writeHead(500.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al consultar las empresas' }));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Error al consultar empresas aliadas' }));
         }
     },
 
     obtenerPorId: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
         try {
-            const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM empresa WHERE id_empresa = ?', [id]);
-            if (rows.length === 0.00) {
-                res.writeHead(404.00, { 'Content-Type': 'application/json' });
+            const [rows]: any = await pool.query('SELECT * FROM empresas_aliadas WHERE id_empresa = ?', [id]);
+            if (rows.length === 0) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ error: 'Empresa no encontrada' }));
             }
-            res.writeHead(200.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(rows[0.00]));
-        } catch {
-            res.writeHead(500.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al consultar la empresa' }));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(rows[0]));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Error al obtener empresa' }));
         }
     },
 
-    crear: async (req: IncomingMessage, res: ServerResponse) => {
+    crear: async (data: any, res: ServerResponse) => {
         try {
-            const data = await parseBody(req);
-            const { nombre_empresa, nit, contacto, telefono, correo } = data;
-            const [result] = await pool.query<ResultSetHeader>(
-                'INSERT INTO empresa (nombre_empresa, nit, contacto, telefono, correo) VALUES (?, ?, ?, ?, ?)',
-                [nombre_empresa, nit, contacto, telefono, correo]
+            const { id_usuario, razon_social, tipo_relacion, contacto_corporativo } = data;
+            const [result]: any = await pool.query(
+                'INSERT INTO empresas_aliadas (id_usuario, razon_social, tipo_relacion, contacto_corporativo) VALUES (?, ?, ?, ?)',
+                [id_usuario, razon_social, tipo_relacion, contacto_corporativo]
             );
-            res.writeHead(201.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ id_empresa: result.insertId, ...data }));
-        } catch {
-            res.writeHead(400.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Datos inválidos' }));
+            res.writeHead(201, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ mensaje: 'Empresa creada', id_empresa: result.insertId }));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Error al crear empresa' }));
         }
     },
 
-    actualizar: async (req: IncomingMessage, res: ServerResponse, id: string) => {
+    actualizar: async (data: any, res: ServerResponse, id: string) => {
         try {
-            const data = await parseBody(req);
-            const { nombre_empresa, nit, contacto, telefono, correo } = data;
-            const [result] = await pool.query<ResultSetHeader>(
-                'UPDATE empresa SET nombre_empresa = ?, nit = ?, contacto = ?, telefono = ?, correo = ? WHERE id_empresa = ?',
-                [nombre_empresa, nit, contacto, telefono, correo, id]
+            const { id_usuario, razon_social, tipo_relacion, contacto_corporativo } = data;
+            const [result]: any = await pool.query(
+                'UPDATE empresas_aliadas SET id_usuario = ?, razon_social = ?, tipo_relacion = ?, contacto_corporativo = ? WHERE id_empresa = ?',
+                [id_usuario, razon_social, tipo_relacion, contacto_corporativo, id]
             );
-            if (result.affectedRows === 0.00) {
-                res.writeHead(404.00, { 'Content-Type': 'application/json' });
+            if (result.affectedRows === 0) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ error: 'Empresa no encontrada' }));
             }
-            res.writeHead(200.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ id_empresa: Number(id), ...data }));
-        } catch {
-            res.writeHead(400.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Datos inválidos' }));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ mensaje: 'Empresa actualizada' }));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Error al actualizar empresa' }));
         }
     },
 
     eliminar: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
         try {
-            const [result] = await pool.query<ResultSetHeader>('DELETE FROM empresa WHERE id_empresa = ?', [id]);
-            if (result.affectedRows === 0.00) {
-                res.writeHead(404.00, { 'Content-Type': 'application/json' });
+            const [result]: any = await pool.query('DELETE FROM empresas_aliadas WHERE id_empresa = ?', [id]);
+            if (result.affectedRows === 0) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ error: 'Empresa no encontrada' }));
             }
-            res.writeHead(200.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ mensaje: 'Empresa eliminada correctamente' }));
-        } catch {
-            res.writeHead(500.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al eliminar la empresa' }));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ mensaje: 'Empresa eliminada' }));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Error al eliminar empresa' }));
         }
     }
 };
