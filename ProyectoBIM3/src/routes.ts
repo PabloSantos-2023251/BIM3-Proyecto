@@ -2,7 +2,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { usuarioService } from './service/usuarioService.js';
 import { beneficiarioService } from './service/beneficiarioService.js';
 import { empresaService } from './service/empresaService.js';
-
+import { estudioSocioeconomicoService } from './service/estudioSocioeconomicoService.js';
 
 export async function router(req: IncomingMessage, res: ServerResponse) {
     const rawHost = req.headers.host || 'localhost:3000';
@@ -45,6 +45,14 @@ export async function router(req: IncomingMessage, res: ServerResponse) {
         if (metodo === 'POST') return empresaService.crear(req, res);
         if (metodo === 'PUT' && id) return empresaService.actualizar(req, res, id);
         if (metodo === 'DELETE' && id) return empresaService.eliminar(req, res, id);
+    }
+
+    // 4. ESTUDIOS SOCIOECONOMICOS
+    if (ruta === '/estudios-socioeconomicos') {
+        if (metodo === 'GET') return id ? estudioSocioeconomicoService.obtenerPorId(req, res, id) : estudioSocioeconomicoService.obtenerTodos(req, res);
+        if (metodo === 'POST') return estudioSocioeconomicoService.crear(req, res);
+        if (metodo === 'PUT' && id) return estudioSocioeconomicoService.actualizar(req, res, id);
+        if (metodo === 'DELETE' && id) return estudioSocioeconomicoService.eliminar(req, res, id);
     }
 
     // 404 SI NO COINCIDE NINGUNA RUTA
