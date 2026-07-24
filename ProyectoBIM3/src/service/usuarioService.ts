@@ -17,7 +17,6 @@ export const usuarioService = {
         } catch (err) {
             console.error('Error exacto de MySQL:', err)
             res.writeHead(500.00, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al consultar la base de datos' }));
         }
     },
 
