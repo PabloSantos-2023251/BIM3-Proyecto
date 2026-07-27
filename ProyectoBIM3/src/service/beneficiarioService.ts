@@ -1,19 +1,19 @@
-import { IncomingMessage, ServerResponse } from 'http';
+import { ServerResponse } from 'http';
 import { pool } from '../data/db.js';
 
 export const beneficiarioService = {
-    obtenerTodos: async (_req: IncomingMessage, res: ServerResponse) => {
+    obtenerTodos: async (res: ServerResponse) => {
         try {
             const [rows] = await pool.query('SELECT * FROM beneficiarios');
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(rows));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al consultar beneficiarios' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     },
 
-    obtenerPorId: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
+    obtenerPorId: async (res: ServerResponse, id: string) => {
         try {
             const [rows]: any = await pool.query('SELECT * FROM beneficiarios WHERE id_beneficiario = ?', [id]);
             if (rows.length === 0) {
@@ -22,9 +22,9 @@ export const beneficiarioService = {
             }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(rows[0]));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al obtener beneficiario' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     },
 
@@ -37,9 +37,9 @@ export const beneficiarioService = {
             );
             res.writeHead(201, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ mensaje: 'Beneficiario creado', id_beneficiario: result.insertId }));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al crear beneficiario' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     },
 
@@ -48,7 +48,7 @@ export const beneficiarioService = {
             const { cui_dpi, nombre_completo, direccion_comunidad, departamento, cantidad_dependientes } = data;
             const [result]: any = await pool.query(
                 'UPDATE beneficiarios SET cui_dpi = ?, nombre_completo = ?, direccion_comunidad = ?, departamento = ?, cantidad_dependientes = ? WHERE id_beneficiario = ?',
-                [cui_dpi, nombre_completo, direccion_comunidad, departamento, cantidad_dependientes, id]
+                [cui_dpi, nombre_completo, direccion_comunidad, departamento, cantidad_dependientes ?? 0, id]
             );
             if (result.affectedRows === 0) {
                 res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -56,13 +56,13 @@ export const beneficiarioService = {
             }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ mensaje: 'Beneficiario actualizado' }));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al actualizar beneficiario' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     },
 
-    eliminar: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
+    eliminar: async (res: ServerResponse, id: string) => {
         try {
             const [result]: any = await pool.query('DELETE FROM beneficiarios WHERE id_beneficiario = ?', [id]);
             if (result.affectedRows === 0) {
@@ -71,9 +71,9 @@ export const beneficiarioService = {
             }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ mensaje: 'Beneficiario eliminado' }));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al eliminar beneficiario' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     }
 };

@@ -1,19 +1,19 @@
-import { IncomingMessage, ServerResponse } from 'http';
+import { ServerResponse } from 'http';
 import { pool } from '../data/db.js';
 
 export const estudioSocioeconomicoService = {
-    obtenerTodos: async (_req: IncomingMessage, res: ServerResponse) => {
+    obtenerTodos: async (res: ServerResponse) => {
         try {
             const [rows] = await pool.query('SELECT * FROM estudios_socioeconomicos');
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(rows));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al consultar estudios socioeconómicos' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     },
 
-    obtenerPorId: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
+    obtenerPorId: async (res: ServerResponse, id: string) => {
         try {
             const [rows]: any = await pool.query('SELECT * FROM estudios_socioeconomicos WHERE id_estudio = ?', [id]);
             if (rows.length === 0) {
@@ -22,9 +22,9 @@ export const estudioSocioeconomicoService = {
             }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(rows[0]));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al obtener estudio' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     },
 
@@ -37,9 +37,9 @@ export const estudioSocioeconomicoService = {
             );
             res.writeHead(201, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ mensaje: 'Estudio creado', id_estudio: result.insertId }));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al crear estudio' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     },
 
@@ -56,13 +56,13 @@ export const estudioSocioeconomicoService = {
             }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ mensaje: 'Estudio actualizado' }));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al actualizar estudio' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     },
 
-    eliminar: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
+    eliminar: async (res: ServerResponse, id: string) => {
         try {
             const [result]: any = await pool.query('DELETE FROM estudios_socioeconomicos WHERE id_estudio = ?', [id]);
             if (result.affectedRows === 0) {
@@ -71,9 +71,9 @@ export const estudioSocioeconomicoService = {
             }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ mensaje: 'Estudio eliminado' }));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al eliminar estudio' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     }
 };

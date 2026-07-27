@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from 'http';
-import { pool } from '../data/db';
+import { pool } from '../data/db.js';
 
 export const inventarioEspecieService = {
     obtenerTodos: async (_req: IncomingMessage, res: ServerResponse) => {

@@ -157,3 +157,5 @@ INSERT INTO detalle_asignacion_inventario (id_asignacion, id_articulo, cantidad_
 (1, 1, 10), 
 (1, 2, 2), 
 (2, 3, 5);
+
+select * from usuarios
