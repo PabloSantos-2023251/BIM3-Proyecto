@@ -15,14 +15,14 @@ export const usuarioService = {
             res.writeHead(200.00, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(rows));
         } catch (err) {
-            console.error('Error exacto de MySQL:', err)
+            console.error('Error exacto de MySQL:', err);
             res.writeHead(500.00, { 'Content-Type': 'application/json' });
         }
     },
 
     obtenerPorId: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
         try {
-            const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM usuario WHERE id_usuario = ?', [id]);
+            const [rows] = await pool.query<RowDataPacket[]>('SELECT * FROM usuarios WHERE id_usuario = ?', [id]);
             if (rows.length === 0.00) {
                 res.writeHead(404.00, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ error: 'Usuario no encontrado' }));
@@ -38,14 +38,29 @@ export const usuarioService = {
     crear: async (req: IncomingMessage, res: ServerResponse) => {
         try {
             const data = await parseBody(req);
-            const { nombre, correo, contrasenia, rol, telefono } = data;
-            const [result] = await pool.query<ResultSetHeader>(
-                'INSERT INTO usuario (nombre, correo, contrasenia, rol, telefono) VALUES (?, ?, ?, ?, ?)',
-                [nombre, correo, contrasenia, rol, telefono]
+            const { nombre_completo, correo_electronico, contrasena, rol, telefono } = data;
+
+            const dominiosPermitidos = ['@gmail.com', '@yahoo.com', '@outlook.com'];
+            const correoValido = dominiosPermitidos.some(dominio =>
+                correo_electronico?.toLowerCase().endsWith(dominio)
             );
+
+            if (!correoValido) {
+                res.writeHead(400.00, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({
+                    error: 'El correo debe ser de dominio gmail.com, yahoo.com o outlook.com'
+                }));
+            }
+
+            const [result] = await pool.query<ResultSetHeader>(
+                'INSERT INTO usuarios (nombre_completo, correo_electronico, contrasena, rol, telefono) VALUES (?, ?, ?, ?, ?)',
+                [nombre_completo, correo_electronico, contrasena, rol, telefono]
+            );
+
             res.writeHead(201.00, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ id_usuario: result.insertId, ...data }));
-        } catch {
+        } catch (err) {
+            console.error('Error al insertar usuario:', err);
             res.writeHead(400.00, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'Datos inválidos o error en la inserción' }));
         }
@@ -54,15 +69,33 @@ export const usuarioService = {
     actualizar: async (req: IncomingMessage, res: ServerResponse, id: string) => {
         try {
             const data = await parseBody(req);
-            const { nombre, correo, contrasenia, rol, telefono } = data;
+            const { nombre_completo, correo_electronico, contrasena, rol, telefono } = data;
+
+            // Validar el dominio solo si vienen enviando un correo_electronico a actualizar
+            if (correo_electronico) {
+                const dominiosPermitidos = ['@gmail.com', '@yahoo.com', '@outlook.com'];
+                const correoValido = dominiosPermitidos.some(dominio =>
+                    correo_electronico.toLowerCase().endsWith(dominio)
+                );
+
+                if (!correoValido) {
+                    res.writeHead(400.00, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({
+                        error: 'El correo debe ser de dominio gmail.com, yahoo.com o outlook.com'
+                    }));
+                }
+            }
+
             const [result] = await pool.query<ResultSetHeader>(
-                'UPDATE usuario SET nombre = ?, correo = ?, contrasenia = ?, rol = ?, telefono = ? WHERE id_usuario = ?',
-                [nombre, correo, contrasenia, rol, telefono, id]
+                'UPDATE usuarios SET nombre_completo = ?, correo_electronico = ?, contrasena = ?, rol = ?, telefono = ? WHERE id_usuario = ?',
+                [nombre_completo, correo_electronico, contrasena, rol, telefono, id]
             );
+
             if (result.affectedRows === 0.00) {
                 res.writeHead(404.00, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ error: 'Usuario no encontrado' }));
             }
+
             res.writeHead(200.00, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ id_usuario: Number(id), ...data }));
         } catch {
@@ -73,7 +106,7 @@ export const usuarioService = {
 
     eliminar: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
         try {
-            const [result] = await pool.query<ResultSetHeader>('DELETE FROM usuario WHERE id_usuario = ?', [id]);
+            const [result] = await pool.query<ResultSetHeader>('DELETE FROM usuarios WHERE id_usuario = ?', [id]);
             if (result.affectedRows === 0.00) {
                 res.writeHead(404.00, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ error: 'Usuario no encontrado' }));
