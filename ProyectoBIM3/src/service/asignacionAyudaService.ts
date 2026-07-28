@@ -1,19 +1,19 @@
-import { IncomingMessage, ServerResponse } from 'http';
+import { ServerResponse } from 'http';
 import { pool } from '../data/db.js';
 
 export const asignacionAyudaService = {
-    obtenerTodos: async (_req: IncomingMessage, res: ServerResponse) => {
+    obtenerTodos: async (_req: any, res: ServerResponse) => {
         try {
             const [rows] = await pool.query('SELECT * FROM asignaciones_ayuda');
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(rows));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al consultar asignaciones de ayuda' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     },
 
-    obtenerPorId: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
+    obtenerPorId: async (_req: any, res: ServerResponse, id: string) => {
         try {
             const [rows]: any = await pool.query('SELECT * FROM asignaciones_ayuda WHERE id_asignacion = ?', [id]);
             if (rows.length === 0) {
@@ -22,9 +22,9 @@ export const asignacionAyudaService = {
             }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(rows[0]));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al obtener asignación de ayuda' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     },
 
@@ -37,9 +37,10 @@ export const asignacionAyudaService = {
             );
             res.writeHead(201, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ mensaje: 'Asignación creada', id_asignacion: result.insertId }));
-        } catch (error) {
+        } catch (error: any) {
+            console.error("ERROR REAL EN MYSQL:", error.message);
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al crear asignación de ayuda' }));
+            res.end(JSON.stringify({ error: 'Error al crear asignación de ayuda', detalle: error.message }));
         }
     },
 
@@ -56,13 +57,13 @@ export const asignacionAyudaService = {
             }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ mensaje: 'Asignación actualizada' }));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al actualizar asignación' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     },
 
-    eliminar: async (_req: IncomingMessage, res: ServerResponse, id: string) => {
+    eliminar: async (_req: any, res: ServerResponse, id: string) => {
         try {
             const [result]: any = await pool.query('DELETE FROM asignaciones_ayuda WHERE id_asignacion = ?', [id]);
             if (result.affectedRows === 0) {
@@ -71,9 +72,9 @@ export const asignacionAyudaService = {
             }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ mensaje: 'Asignación eliminada' }));
-        } catch (error) {
+        } catch (error: any) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Error al eliminar asignación' }));
+            res.end(JSON.stringify({ error: error.message }));
         }
     }
 };
