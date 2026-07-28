@@ -19,7 +19,7 @@ create table empresas_aliadas (
     tipo_relacion varchar(30) not null,
     contacto_corporativo varchar(100),
     constraint pk_empresas_aliadas primary key (id_empresa),
-    constraint fk_empresas_usuarios foreign key (id_usuario) references usuarios(id_usuario)
+    constraint fk_empresas_usuarios foreign key (id_usuario) references usuarios(id_usuario) on delete cascade
 );
 
 create table beneficiarios (
@@ -40,8 +40,8 @@ create table estudios_socioeconomicos (
     nivel_vulnerabilidad varchar(20) not null,
     fecha_evaluacion date not null,
     constraint pk_estudios_socioeconomicos primary key (id_estudio),
-    constraint fk_estudios_beneficiarios foreign key (id_beneficiario) references beneficiarios(id_beneficiario),
-    constraint fk_estudios_usuarios foreign key (id_trabajador) references usuarios(id_usuario)
+    constraint fk_estudios_beneficiarios foreign key (id_beneficiario) references beneficiarios(id_beneficiario) on delete cascade,
+    constraint fk_estudios_usuarios foreign key (id_trabajador) references usuarios(id_usuario) on delete cascade
 );
 
 create table centros_acopio (
@@ -61,9 +61,9 @@ create table donaciones (
     fecha_donacion date not null,
     monto_monetario decimal(10, 2) default null,
     constraint pk_donaciones primary key (id_donacion),
-    constraint fk_donaciones_usuarios foreign key (id_usuario) references usuarios(id_usuario),
-    constraint fk_donaciones_empresas foreign key (id_empresa) references empresas_aliadas(id_empresa),
-    constraint fk_donaciones_centros foreign key (id_centro) references centros_acopio(id_centro)
+    constraint fk_donaciones_usuarios foreign key (id_usuario) references usuarios(id_usuario) on delete set null,
+    constraint fk_donaciones_empresas foreign key (id_empresa) references empresas_aliadas(id_empresa) on delete set null,
+    constraint fk_donaciones_centros foreign key (id_centro) references centros_acopio(id_centro) on delete cascade
 );
 
 create table inventario_especie (
@@ -73,7 +73,7 @@ create table inventario_especie (
     descripcion varchar(255) not null,
     cantidad_disponible int not null default 0,
     constraint pk_inventario_especie primary key (id_articulo),
-    constraint fk_inventario_donaciones foreign key (id_donacion) references donaciones(id_donacion)
+    constraint fk_inventario_donaciones foreign key (id_donacion) references donaciones(id_donacion) on delete cascade
 );
 
 create table solicitudes_ayuda (
@@ -84,8 +84,8 @@ create table solicitudes_ayuda (
     estado_solicitud varchar(20) not null default 'Pendiente',
     fecha_solicitud date not null,
     constraint pk_solicitudes_ayuda primary key (id_solicitud),
-    constraint fk_solicitudes_beneficiarios foreign key (id_beneficiario) references beneficiarios(id_beneficiario),
-    constraint fk_solicitudes_empresas foreign key (id_empresa_receptora) references empresas_aliadas(id_empresa)
+    constraint fk_solicitudes_beneficiarios foreign key (id_beneficiario) references beneficiarios(id_beneficiario) on delete set null,
+    constraint fk_solicitudes_empresas foreign key (id_empresa_receptora) references empresas_aliadas(id_empresa) on delete set null
 );
 
 create table asignaciones_ayuda (
@@ -94,7 +94,7 @@ create table asignaciones_ayuda (
     fecha_asignacion date not null,
     estado_entrega varchar(20) not null default 'En Bodega',
     constraint pk_asignaciones_ayuda primary key (id_asignacion),
-    constraint fk_asignaciones_solicitudes foreign key (id_solicitud) references solicitudes_ayuda(id_solicitud)
+    constraint fk_asignaciones_solicitudes foreign key (id_solicitud) references solicitudes_ayuda(id_solicitud) on delete cascade
 );
 
 create table detalle_asignacion_inventario (
@@ -103,10 +103,11 @@ create table detalle_asignacion_inventario (
     id_articulo int not null,
     cantidad_entregada int not null default 1,
     constraint pk_detalle_asignacion primary key (id_detalle),
-    constraint fk_detalle_asignaciones foreign key (id_asignacion) references asignaciones_ayuda(id_asignacion),
-    constraint fk_detalle_inventario foreign key (id_articulo) references inventario_especie(id_articulo)
+    constraint fk_detalle_asignaciones foreign key (id_asignacion) references asignaciones_ayuda(id_asignacion) on delete cascade,
+    constraint fk_detalle_inventario foreign key (id_articulo) references inventario_especie(id_articulo) on delete cascade
 );
 
+-- INSERTS DE PRUEBA
 INSERT INTO usuarios (nombre_completo, correo_electronico, contrasena, telefono, rol) VALUES 
 ('Carlos Gómez', 'carlos.gomez@gmail.com', 'pass123', '55112233', 'Donante'), 
 ('Ana Torres', 'ana.torres@gmail.com', 'pass456', '44223344', 'Donante'), 
@@ -158,4 +159,4 @@ INSERT INTO detalle_asignacion_inventario (id_asignacion, id_articulo, cantidad_
 (1, 2, 2), 
 (2, 3, 5);
 
-select * from usuarios
+select * from usuarios;
