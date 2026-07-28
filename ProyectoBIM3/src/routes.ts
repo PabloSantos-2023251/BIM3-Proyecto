@@ -129,9 +129,9 @@ export async function router(req: IncomingMessage, res: ServerResponse) {
             if (metodo === 'DELETE' && id) return empresaService.eliminar(res, id);
         }
 
-        // 7. ESTUDIOS SOCIOECONOMICOS
+        // 7. ESTUDIOS SOCIOECONOMICOS (Actualizado con soporte para req, res, id)
         if (ruta === '/estudios-socioeconomicos' || ruta === '/estudioSocioeconomico') {
-            if (metodo === 'GET') return id ? estudioSocioeconomicoService.obtenerPorId(res, id) : estudioSocioeconomicoService.obtenerTodos(res);
+            if (metodo === 'GET') return id ? estudioSocioeconomicoService.obtenerPorId(req, res, id) : estudioSocioeconomicoService.obtenerTodos(req, res);
             if (metodo === 'POST') {
                 const data = await obtenerBodyJSON(req);
                 return estudioSocioeconomicoService.crear(data, res);
@@ -140,7 +140,7 @@ export async function router(req: IncomingMessage, res: ServerResponse) {
                 const data = await obtenerBodyJSON(req);
                 return estudioSocioeconomicoService.actualizar(data, res, id);
             }
-            if (metodo === 'DELETE' && id) return estudioSocioeconomicoService.eliminar(res, id);
+            if (metodo === 'DELETE' && id) return estudioSocioeconomicoService.eliminar(req, res, id);
         }
 
         // 8. INVENTARIO ESPECIE
@@ -171,7 +171,7 @@ export async function router(req: IncomingMessage, res: ServerResponse) {
             if (metodo === 'DELETE' && id) return solicitudAyudaService.eliminar(req, res, id);
         }
 
-        // 10. USUARIOS (Ajustado a la firma exacta de tu usuarioService)
+        // 10. USUARIOS
         if (ruta === '/usuarios' || ruta === '/usuario') {
             if (metodo === 'GET') return id ? usuarioService.obtenerPorId(res, id) : usuarioService.obtenerTodos(res);
             if (metodo === 'POST') {
